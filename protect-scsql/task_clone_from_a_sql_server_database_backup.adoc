@@ -1,0 +1,359 @@
+---
+permalink: protect-scsql/task_clone_from_a_sql_server_database_backup.html 
+sidebar: sidebar 
+keywords: clone 
+summary: È possibile utilizzare SnapCenter per clonare un backup del database SQL Server. Se si desidera accedere o ripristinare una versione precedente dei dati, è possibile clonare i backup del database su richiesta. 
+---
+= Clonare da un backup di database SQL Server
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/
+
+
+[role="lead"]
+È possibile utilizzare SnapCenter per clonare un backup del database SQL Server. Se si desidera accedere o ripristinare una versione precedente dei dati, è possibile clonare i backup del database su richiesta.
+
+.Prima di iniziare
+* Dovresti aver preparato per la protezione dei dati completando attività come l'aggiunta di host, l'identificazione delle risorse e la creazione di connessioni al sistema di storage.
+* Si dovrebbe aver eseguito il backup di database o gruppi di risorse.
+* Il tipo di protezione, ad esempio mirror, vault o mirror-vault per LUN di dati e LUN di log, deve essere lo stesso per rilevare i locatori secondari durante la clonazione a un host alternativo utilizzando i backup di log.
+* Se il disco clone montato non viene trovato durante un'operazione di clonazione SnapCenter, modificare il parametro CloneRetryTimeout del server SnapCenter in 300.
+* Assicurarsi che gli aggregati che ospitano i volumi siano inclusi nell'elenco degli aggregati assegnati della macchina virtuale di storage (SVM).
+
+
+.A proposito di questa attività
+* Durante la clonazione in un'istanza di database standalone, assicurarsi che il percorso del punto di montaggio esista e che si tratti di un disco dedicato.
+* Durante la clonazione in un'istanza del cluster di failover (FCI), assicurarsi che i punti di montaggio esistano, che si tratti di un disco condiviso e che il percorso e l'FCI appartengano allo stesso gruppo di risorse SQL.
+* Assicurarsi che a ciascun host sia collegato un solo iniziatore VFC o FC. Questo perché SnapCenter supporta un solo iniziatore per host.
+* Se il database di origine o l'istanza di destinazione si trova su un volume condiviso del cluster (csv), il database clonato si trova nel file csv.
+* IL PERCORSO_SCRIPT viene definito utilizzando la chiave PredesedWindowsScriptsDirectory situata nel file SMCoreServiceHost.exe.Config dell'host del plug-in.
++
+Se necessario, è possibile modificare questo percorso e riavviare il servizio SMcore. Si consiglia di utilizzare il percorso predefinito per la protezione.
+
++
+Il valore della chiave può essere visualizzato da swagger attraverso l'API: API /4.7/configsettings
+
++
+È possibile utilizzare L'API GET per visualizzare il valore della chiave. L'API SET non è supportata.
+
+
+
+
+NOTE: Per gli ambienti virtuali (VMDK/RDM), assicurarsi che il punto di montaggio sia un disco dedicato.
+
+* Per ONTAP 9.12.1 e versioni precedenti, i cloni creati dagli Snapshot del vault di SnapLock come parte del ripristino ereditano il tempo di scadenza del vault di SnapLock. L'amministratore dello storage dovrebbe ripulire manualmente i cloni dopo il tempo di scadenza del SnapLock.
+
+
+[role="tabbed-block"]
+====
+.SnapCenter UI
+--
+.Fasi
+. Nel riquadro di spostamento di sinistra, selezionare *risorse*, quindi selezionare *plug-in SnapCenter per SQL Server* dall'elenco.
+. Nella pagina Resources (risorse), selezionare *Database* o *Resource Group* dall'elenco *View* (Visualizza).
++
+
+NOTE: La clonazione di un backup di un'istanza non è supportata.
+
+. Selezionare il database o il gruppo di risorse.
+. Dalla pagina di visualizzazione *Gestisci copie*, selezionare il backup dal sistema di storage primario o secondario (mirrorato o vault).
+. Selezionare il backup, quindi *image:../media/clone_icon.gif["icona clona"]*.
+. Nella pagina *Clone Options*, eseguire le seguenti operazioni:
++
+|===
+| Per questo campo... | Eseguire questa operazione... 
+
+
+ a| 
+Server clone
+ a| 
+Scegliere un host su cui creare il clone.
+
+
+
+ a| 
+Clonare l'istanza
+ a| 
+Scegliere un'istanza di clone in cui clonare il backup del database.
+
+Questa istanza SQL deve trovarsi nel server clone specificato.
+
+
+
+ a| 
+Suffisso clone
+ a| 
+Inserire un suffisso che verrà aggiunto al nome del file clone per identificare che il database è un clone.
+
+Ad esempio, _db1_clone_. Se si esegue la clonazione nella stessa posizione del database originale, è necessario fornire un suffisso per differenziare il database clonato dal database originale. In caso contrario, l'operazione non riesce.
+
+
+
+ a| 
+Assegnazione automatica del punto di montaggio o assegnazione automatica del punto di montaggio del volume sotto il percorso
+ a| 
+Scegliere se assegnare automaticamente un punto di montaggio o un punto di montaggio del volume sotto un percorso.
+
+Auto assign volume mount point under path (assegnazione automatica del punto di montaggio del volume sotto il percorso): Il punto di montaggio sotto un percorso consente di fornire una directory specifica. I punti di montaggio verranno creati all'interno di tale directory. Prima di scegliere questa opzione, assicurarsi che la directory sia vuota. Se nella directory è presente un database, il database si trova in uno stato non valido dopo l'operazione di montaggio.
+
+|===
+. Nella pagina registri, selezionare una delle seguenti opzioni:
++
+|===
+| Per questo campo... | Eseguire questa operazione... 
+
+
+ a| 
+Nessuno
+ a| 
+Scegliere questa opzione se si desidera clonare solo il backup completo senza alcun log.
+
+
+
+ a| 
+Tutti i backup dei log
+ a| 
+Scegliere questa opzione per clonare tutti i backup del registro disponibili datati dopo il backup completo.
+
+
+
+ a| 
+In base ai backup dei log fino a.
+ a| 
+Scegliere questa opzione per clonare il database in base ai registri di backup creati fino al log di backup con la data selezionata.
+
+
+
+ a| 
+Per data specifica fino al
+ a| 
+Specificare la data e l'ora dopo le quali i log delle transazioni non vengono applicati al database clonato.
+
+Questo clone point-in-time interrompe il clone delle voci del log delle transazioni registrate dopo la data e l'ora specificate.
+
+|===
+. Nella pagina *script*, immettere il timeout dello script, il percorso e gli argomenti del prescrittt o del postscript che devono essere eseguiti rispettivamente prima o dopo l'operazione di clone.
++
+Ad esempio, è possibile eseguire uno script per aggiornare i trap SNMP, automatizzare gli avvisi, inviare i registri e così via.
+
++
+
+NOTE: Il percorso prescripts o postscripts non deve includere dischi o condivisioni. Il percorso deve essere relativo al PERCORSO_SCRIPT.
+
++
+Il timeout predefinito dello script è di 60 secondi.
+
+. Nella pagina *Notification*, dall'elenco a discesa *Email preference* (Preferenze email), selezionare gli scenari in cui si desidera inviare i messaggi e-mail.
++
+È inoltre necessario specificare gli indirizzi e-mail del mittente e del destinatario e l'oggetto dell'e-mail. Se si desidera allegare il report dell'operazione di clonazione eseguita, selezionare *Allega report*.
+
++
+
+NOTE: Per la notifica via email, è necessario aver specificato i dettagli del server SMTP utilizzando la GUI o il comando PowerShell Set-SmtpServer.
+
++
+Per EMS, fare riferimento a. https://docs.netapp.com/us-en/snapcenter/admin/concept_manage_ems_data_collection.html["Gestire la raccolta di dati EMS"]
+
+. Esaminare il riepilogo, quindi selezionare *fine*.
+. Monitorare l'avanzamento dell'operazione selezionando *Monitor* > *Jobs*.
+
+
+.Al termine
+Una volta creato il clone, non rinominarlo.
+
+.Informazioni correlate
+https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Clone_operation_might_fail_or_take_longer_time_to_complete_with_default_TCP_TIMEOUT_value["L'operazione di clonazione potrebbe non riuscire o richiedere più tempo per il completamento con il valore TCP_TIMEOUT predefinito"]
+
+https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/The_failover_cluster_instance_database_clone_fails["Il clone del database dell'istanza del cluster di failover non riesce"]
+
+--
+.Cmdlet PowerShell
+--
+.Fasi
+. Avviare una sessione di connessione con il server SnapCenter per un utente specifico utilizzando il cmdlet Open-SmConnection.
++
+[listing]
+----
+Open-SmConnection  -SMSbaseurl  https://snapctr.demo.netapp.com:8146
+----
+. Elencare i backup che possono essere clonati utilizzando il cmdlet Get-SmBackup o Get-SmResourceGroup.
++
+Questo esempio mostra informazioni su tutti i backup disponibili:
+
++
+[listing]
+----
+C:\PS>PS C:\> Get-SmBackup
+
+BackupId   BackupName                     BackupTime   BackupType
+--------   ----------                     ----------   ----------
+1          Payroll Dataset_vise-f6_08...  8/4/2015     Full Backup
+                                          11:02:32 AM
+
+2          Payroll Dataset_vise-f6_08...  8/4/2015
+                                          11:23:17 AM
+----
++
+Nell'esempio riportato di seguito vengono visualizzate informazioni su un gruppo di risorse specificato, sulle relative risorse e sui criteri associati:
+
++
+[listing]
+----
+PS C:\> Get-SmResourceGroup -ListResources –ListPolicies
+
+Description :
+CreationTime : 8/4/2015 3:44:05 PM
+ModificationTime : 8/4/2015 3:44:05 PM
+EnableEmail : False
+EmailSMTPServer :
+EmailFrom :
+EmailTo :
+EmailSubject :
+EnableSysLog : False
+ProtectionGroupType : Backup
+EnableAsupOnFailure : False
+Policies : {FinancePolicy}
+HostResourceMaping : {}
+Configuration : SMCoreContracts.SmCloneConfiguration
+LastBackupStatus :
+VerificationServer :
+EmailBody :
+EmailNotificationPreference : Never
+VerificationServerInfo : SMCoreContracts.SmVerificationServerInfo
+SchedulerSQLInstance :
+CustomText :
+CustomSnapshotFormat :
+SearchResources : False
+ByPassCredential : False
+IsCustomSnapshot :
+MaintenanceStatus : Production
+PluginProtectionGroupTypes : {SMSQL}
+Name : Payrolldataset
+Type : Group
+Id : 1
+Host :
+UserName :
+Passphrase :
+Deleted : False
+Auth : SMCoreContracts.SmAuth
+IsClone : False
+CloneLevel : 0
+ApplySnapvaultUpdate : False
+ApplyRetention : False
+RetentionCount : 0
+RetentionDays : 0
+ApplySnapMirrorUpdate : False
+SnapVaultLabel :
+MirrorVaultUpdateRetryCount : 7
+AppPolicies : {}
+Description : FinancePolicy
+PreScriptPath :
+PreScriptArguments :
+PostScriptPath :
+PostScriptArguments :
+ScriptTimeOut : 60000
+DateModified : 8/4/2015 3:43:30 PM
+DateCreated : 8/4/2015 3:43:30 PM
+Schedule : SMCoreContracts.SmSchedule
+PolicyType : Backup
+PluginPolicyType : SMSQL
+Name : FinancePolicy
+Type :
+Id : 1
+Host :
+UserName :
+Passphrase :
+Deleted : False
+Auth : SMCoreContracts.SmAuth
+IsClone : False
+CloneLevel : 0
+clab-a13-13.sddev.lab.netapp.com
+DatabaseGUID :
+SQLInstance : clab-a13-13
+DbStatus : AutoClosed
+DbAccess : eUndefined
+IsSystemDb : False
+IsSimpleRecoveryMode : False
+IsSelectable : True
+SqlDbFileGroups : {}
+SqlDbLogFiles : {}
+AppFileStorageGroups : {}
+LogDirectory :
+AgName :
+Version :
+VolumeGroupIndex : -1
+IsSecondary : False
+Name : TEST
+Type : SQL Database
+Id : clab-a13-13\TEST
+Host : clab-a13-13.sddev.mycompany.com
+UserName :
+Passphrase :
+Deleted : False
+Auth : SMCoreContracts.SmAuth
+IsClone : False
+----
+. Avviare un'operazione di clonazione da un backup esistente utilizzando il cmdlet New-SmClone.
++
+Questo esempio crea un clone da un backup specificato con tutti i log:
+
++
+[listing]
+----
+PS C:\> New-SmClone
+-BackupName payroll_dataset_vise-f3_08-05-2015_15.28.28.9774
+-Resources @{"Host"="vise-f3.sddev.mycompany.com";
+"Type"="SQL Database";"Names"="vise-f3\SQLExpress\payroll"}
+-CloneToInstance vise-f3\sqlexpress -AutoAssignMountPoint
+-Suffix _clonefrombackup
+-LogRestoreType All -Policy clonefromprimary_ondemand
+
+PS C:> New-SmBackup -ResourceGroupName PayrollDataset -Policy FinancePolicy
+----
++
+In questo esempio viene creato un clone per un'istanza specifica di Microsoft SQL Server:
+
++
+[listing]
+----
+PS C:\> New-SmClone
+-BackupName "BackupDS1_NY-VM-SC-SQL_12-08-2015_09.00.24.8367"
+-Resources @{"host"="ny-vm-sc-sql";"Type"="SQL Database";
+"Names"="ny-vm-sc-sql\AdventureWorks2012_data"}
+-AppPluginCode SMSQL -CloneToInstance "ny-vm-sc-sql"
+-Suffix _CLPOSH -AssignMountPointUnderPath "C:\SCMounts"
+----
+. Visualizzare lo stato del processo clone utilizzando il cmdlet Get-SmCloneReport.
++
+Questo esempio visualizza un report clone per l'ID lavoro specificato:
+
++
+[listing]
+----
+PS C:\> Get-SmCloneReport -JobId 186
+
+SmCloneId : 1
+SmJobId : 186
+StartDateTime : 8/3/2015 2:43:02 PM
+EndDateTime : 8/3/2015 2:44:08 PM
+Duration : 00:01:06.6760000
+Status : Completed
+ProtectionGroupName : Draper
+SmProtectionGroupId : 4
+PolicyName : OnDemand_Clone
+SmPolicyId : 4
+BackupPolicyName : OnDemand_Full_Log
+SmBackupPolicyId : 1
+CloneHostName : SCSPR0054212005.mycompany.com
+CloneHostId : 4
+CloneName : Draper__clone__08-03-2015_14.43.53
+SourceResources : {Don, Betty, Bobby, Sally}
+ClonedResources : {Don_DRAPER, Betty_DRAPER, Bobby_DRAPER,
+                   Sally_DRAPER}
+----
+
+
+Le informazioni relative ai parametri che possono essere utilizzati con il cmdlet e le relative descrizioni possono essere ottenute eseguendo _Get-Help command_name_. In alternativa, fare riferimento anche a https://docs.netapp.com/us-en/snapcenter-cmdlets/index.html["Guida di riferimento al cmdlet del software SnapCenter"^].
+
+--
+====

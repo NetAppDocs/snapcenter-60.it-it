@@ -1,0 +1,318 @@
+---
+permalink: protect-hana/task_back_up_sap_hana_databases.html 
+sidebar: sidebar 
+keywords: SnapCenter Plug-in for SAP HANA Database 
+summary: Se una risorsa non fa ancora parte di un gruppo di risorse, è possibile eseguire il backup della risorsa dalla pagina risorse. 
+---
+= Eseguire il backup dei database SAP HANA
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/
+
+
+[role="lead"]
+Se una risorsa non fa ancora parte di un gruppo di risorse, è possibile eseguire il backup della risorsa dalla pagina risorse.
+
+.Prima di iniziare
+* È necessario aver creato una policy di backup.
+* Se si desidera eseguire il backup di una risorsa che ha una relazione SnapMirror con uno storage secondario, il ruolo ONTAP assegnato all'utente dello storage deve includere il privilegio "`snapmirror all`". Tuttavia, se si utilizza il ruolo "`vsadmin`", il privilegio "`snapmirror all`" non è richiesto.
+* Per le operazioni di backup basate su copie Snapshot, assicurarsi che tutti i database tenant siano validi e attivi.
+* Per creare backup di replica del sistema SAP HANA, si consiglia di aggiungere tutte le risorse del sistema SAP HANA in un unico gruppo di risorse. Ciò garantisce un backup perfetto durante la modalità takeover-failback.
++
+link:task_create_resource_groups_and_attach_policies.html["Creare gruppi di risorse e allegare policy"].
+
++
+link:task_back_up_resource_groups_sap_hana.html["Eseguire il backup dei gruppi di risorse"]
+
+* Se si desidera creare un backup basato su file quando uno o più database tenant non sono attivi, impostare il parametro ALLOW_FILE_BASED_BACKUP_IFINATTIVO_INQUILINI_PRESENT su *YES* nel file di proprietà HANA utilizzando il `Set-SmConfigSettings` cmdlet.
++
+Le informazioni relative ai parametri che possono essere utilizzati con il cmdlet e le relative descrizioni possono essere ottenute eseguendo Get-Help _command_name_. In alternativa, fare riferimento anche alla https://docs.netapp.com/us-en/snapcenter-cmdlets/index.html["Guida di riferimento al cmdlet del software SnapCenter"]
+
+* Per i comandi pre e post per le operazioni quiescenza, Snapshot e Unquiesce, è necessario controllare se i comandi sono presenti nell'elenco dei comandi disponibile sull'host del plug-in dai seguenti percorsi:
++
+** Posizione predefinita sull'host Windows: _C:\programmi\NetApp\SnapCenter\SnapCenter Plug-in Creator\etc\allowed_Commands.config_
+** Posizione predefinita sull'host Linux: _/opt/NetApp/SnapCenter/scc/etc/allowed_Commands.config_
+
+
+
+
+
+NOTE: Se i comandi non sono presenti nell'elenco dei comandi, l'operazione avrà esito negativo.
+
+[role="tabbed-block"]
+====
+.SnapCenter UI
+--
+.Fasi
+. Nel riquadro di spostamento di sinistra, selezionare *risorse*, quindi selezionare il plug-in appropriato dall'elenco.
+. Nella pagina Resource, filtrare le risorse dall'elenco a discesa *View* in base al tipo di risorsa.
++
+Selezionare image:../media/filter_icon.png["icona del filtro"], quindi selezionare il nome host e il tipo di risorsa per filtrare le risorse. È quindi possibile scegliere image:../media/filter_icon.png["icona del filtro"] di chiudere il riquadro del filtro.
+
+. Selezionare la risorsa di cui si desidera eseguire il backup.
+. Nella pagina risorsa, selezionare *Usa formato nome personalizzato per copia istantanea*, quindi immettere un formato nome personalizzato che si desidera utilizzare per il nome istantanea.
++
+Ad esempio, _customtext_policy_hostname_ o _resource_hostname_. Per impostazione predefinita, al nome dell'istantanea viene aggiunto un indicatore data e ora.
+
+. Nella pagina Impostazioni applicazione, effettuare le seguenti operazioni:
++
+** Selezionare la freccia *Backup* per impostare opzioni di backup aggiuntive:
++
+Attivare il backup dei gruppi di coerenza, se necessario, ed eseguire le seguenti attività:
+
++
+|===
+| Per questo campo... | Eseguire questa operazione... 
+
+
+ a| 
+Attendere il completamento dell'operazione "Consistency Group Snapshot"
+ a| 
+Selezionare *urgente*, *Medio* o *rilassato* per specificare il tempo di attesa per il completamento dell'operazione istantanea. Urgente = 5 secondi, Medio = 7 secondi e rilassato = 20 secondi.
+
+
+
+ a| 
+Disattiva sincronizzazione WAFL
+ a| 
+Selezionare questa opzione per evitare di forzare un punto di coerenza WAFL.
+
+|===
+** Selezionare la freccia *Scripts* per eseguire i comandi pre e post per le operazioni quiescenza, istantanea e inquiescenza.
++
+È inoltre possibile eseguire i comandi preliminari prima di uscire dall'operazione di backup. Le prescrizioni e i postscript vengono eseguiti nel server SnapCenter.
+
+** Selezionare la freccia **configurazioni personalizzate**, quindi immettere le coppie di valori personalizzati richieste per tutti i lavori che utilizzano questa risorsa.
+** Selezionare la freccia *Snapshot Copy Tool* (strumento di copia istantanea) per selezionare lo strumento per creare le istantanee:
++
+|===
+| Se vuoi... | Quindi... 
+
+
+ a| 
+SnapCenter per creare una Snapshot a livello di storage
+ a| 
+Selezionare *SnapCenter senza coerenza del file system*.
+
+
+
+ a| 
+SnapCenter utilizzare il plug-in per Windows per impostare lo stato coerente del file system e quindi creare una Snapshot
+ a| 
+Selezionare *SnapCenter with file system Consistency*.
+
+
+
+ a| 
+Per immettere il comando per creare un'istantanea
+ a| 
+Selezionare *Altro*, quindi immettere il comando per creare un'istantanea.
+
+|===
++
+image:../media/application_settings.gif["impostazioni dell'applicazione"]
+
+
+
+. Nella pagina Criteri, attenersi alla seguente procedura:
++
+.. Selezionare uno o più criteri dall'elenco a discesa.
++
+
+NOTE: È anche possibile creare una policy facendo clic su * *image:../media/add_policy_from_resourcegroup.gif[""].
+
++
+Nella sezione Configure schedules for selected policies (Configura pianificazioni per policy selezionate), vengono elencati i criteri selezionati.
+
+.. Selezionare * *image:../media/add_policy_from_resourcegroup.gif[""]nella colonna Configura pianificazioni per il criterio per il quale si desidera configurare una pianificazione.
+.. Nella finestra di dialogo Add schedules for policy _policy_name_, configurare la pianificazione, quindi selezionare *OK*.
++
+_policy_name_ è il nome del criterio selezionato.
+
++
+Le pianificazioni configurate sono elencate nella colonna Applied Schedules (Pianificazioni applicate).
+
+
+
+. Nella pagina notifica, dall'elenco a discesa *Email preference* (Preferenze email), selezionare gli scenari in cui si desidera inviare i messaggi e-mail.
++
+È inoltre necessario specificare gli indirizzi e-mail del mittente e del destinatario e l'oggetto dell'e-mail. SMTP deve essere configurato anche in *Impostazioni* > *Impostazioni globali*.
+
+. Esaminare il riepilogo, quindi selezionare *fine*.
++
+Viene visualizzata la pagina della topologia delle risorse.
+
+. Selezionare *Esegui backup ora*.
+. Nella pagina Backup, attenersi alla seguente procedura:
++
+.. Se sono stati applicati più criteri alla risorsa, selezionare il criterio da utilizzare per il backup dall'elenco a discesa *Policy*.
++
+Se il criterio selezionato per il backup on-demand è associato a una pianificazione di backup, i backup on-demand verranno conservati in base alle impostazioni di conservazione specificate per il tipo di pianificazione.
+
+.. Selezionare *Backup*.
+
+
+. Monitorare l'avanzamento dell'operazione facendo clic su *Monitor* > *Jobs*.
++
+** Nelle configurazioni MetroCluster, SnapCenter potrebbe non essere in grado di rilevare una relazione di protezione dopo un failover.
++
+Per informazioni, vedere: https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Unable_to_detect_SnapMirror_or_SnapVault_relationship_after_MetroCluster_failover["Impossibile rilevare la relazione SnapMirror o SnapVault dopo il failover di MetroCluster"^]
+
+** Se si esegue il backup dei dati delle applicazioni su VMDK e la dimensione dell'heap Java per il plug-in SnapCenter per VMware vSphere non è sufficiente, il backup potrebbe non riuscire.
++
+Per aumentare la dimensione dell'heap Java, individuare il file script _/opt/netapp/init_scripts/scvservice_. In questo script, il comando _do_start method_ avvia il servizio plug-in VMware di SnapCenter. Aggiornare il comando al seguente: _Java -jar -Xmx8192M -Xms4096M_
+
+
+
+
+
+--
+.Cmdlet PowerShell
+--
+.Fasi
+. Avviare una sessione di connessione con il server SnapCenter per un utente specifico utilizzando il cmdlet Open-SmConnection.
++
+[listing]
+----
+Open-smconnection  -SMSbaseurl  https:\\snapctr.demo.netapp.com:8146\
+----
++
+Viene visualizzato il prompt di nome utente e password.
+
+. Aggiungere risorse utilizzando il cmdlet Add-SmResources.
++
+Questo esempio mostra come aggiungere un database SAP HANA di tipo SingleContainer:
+
++
+[listing]
+----
+C:\PS> Add-SmResource -HostName '10.232.204.42' -PluginCode 'HANA' -DatabaseName H10 -ResourceType SingleContainer -StorageFootPrint (@{"VolumeName"="HanaData10";"StorageSystem"="vserver_scauto_primary"}) -SID 'H10' -filebackuppath '/tmp/HanaFileLog' -userstorekeys 'HS10' -osdbuser 'h10adm' -filebackupprefix 'H10_'
+----
++
+Questo esempio mostra come aggiungere un database SAP HANA di tipo MultipleContainers:
+
++
+[listing]
+----
+C:\PS> Add-SmResource -HostName 'vp-hana2.gdl.englab.netapp.com' -PluginCode 'HANA' -DatabaseName MDC_MT -ResourceType MultipleContainers -StorageFootPrint (@{"VolumeName"="VP_HANA2_data";"StorageSystem"="buck.gdl.englab.netapp.com"}) -sid 'A12' -userstorekeys 'A12KEY' -TenantType 'MultiTenant'
+----
++
+Questo esempio mostra come creare una risorsa di volume non dati:
+
++
+[listing]
+----
+C:\PS> Add-SmResource -HostName 'SNAPCENTERN42.sccore.test.com' -PluginCode 'hana' -ResourceName NonDataVolume -ResourceType NonDataVolume -StorageFootPrint (@{"VolumeName"="ng_pvol";"StorageSystem"="vserver_scauto_primary"}) -sid 'S10'
+----
+. Creare un criterio di backup utilizzando il cmdlet Add-SmPolicy.
++
+Questo esempio crea una policy di backup per un backup basato su copia Snapshot:
+
++
+[listing]
+----
+C:\PS> Add-SmPolicy -PolicyName hana_snapshotbased -PolicyType Backup -PluginPolicyType hana -BackupType SnapShotBasedBackup
+----
++
+Questo esempio crea un criterio di backup per un backup basato su file:
+
++
+[listing]
+----
+C:\PS> Add-SmPolicy -PolicyName hana_Filebased -PolicyType Backup -PluginPolicyType hana -BackupType FileBasedBackup
+----
+. Proteggere la risorsa o aggiungere un nuovo gruppo di risorse a SnapCenter utilizzando il cmdlet Add-SmResourceGroup.
++
+Questo esempio protegge una singola risorsa di container:
+
++
+[listing]
+----
+C:\PS> Add-SmProtectResource -PluginCode HANA  -Policies hana_snapshotbased,hana_Filebased
+ -Resources @{"Host"="host.example.com";"UID"="SID"} -Description test -usesnapcenterwithoutfilesystemconsistency
+----
++
+Questo esempio protegge una risorsa di container multipli:
+
++
+[listing]
+----
+C:\PS> Add-SmProtectResource -PluginCode HANA  -Policies hana_snapshotbased,hana_Filebased
+ -Resources @{"Host"="host.example.com";"UID"="MDC\SID"} -Description test -usesnapcenterwithoutfilesystemconsistency
+----
++
+In questo esempio viene creato un nuovo gruppo di risorse con le risorse e i criteri specificati:
+
++
+[listing]
+----
+C:\PS> Add-SmResourceGroup -ResourceGroupName 'ResourceGroup_with_SingleContainer_MultipleContainers_Resources' -Resources @(@{"Host"="sccorelinux61.sccore.test.com";"Uid"="SID"},@{"Host"="sccorelinux62.sccore.test.com";"Uid"="MDC\SID"})
+  -Policies hana_snapshotbased,hana_Filebased  -usesnapcenterwithoutfilesystemconsistency  -plugincode 'HANA'
+----
++
+In questo esempio viene creato un gruppo di risorse di volumi non dati:
+
++
+[listing]
+----
+C:\PS> Add-SmResourceGroup -ResourceGroupName 'Mixed_RG_backup_when_Remove_Backup_throguh_BackupName_windows' -Resources @(@{"Host"="SNAPCENTERN42.sccore.test.com";"Uid"="H11";"PluginName"="hana"},@{"Host"="SNAPCENTERN42.sccore.test.com";"Uid"="MDC\H31";"PluginName"="hana"},@{"Host"="SNAPCENTERN42.sccore.test.com";"Uid"="NonDataVolume\S10\NonDataVolume";"PluginName"="hana"}) -Policies hanaprimary
+----
+. Avviare un nuovo processo di backup utilizzando il cmdlet New-SmBackup.
++
+Questo esempio mostra come eseguire il backup di un gruppo di risorse:
+
++
+[listing]
+----
+C:\PS> New-SMBackup -ResourceGroupName 'ResourceGroup_with_SingleContainer_MultipleContainers_Resources'  -Policy hana_snapshotbased
+----
++
+Questo esempio esegue il backup di una risorsa protetta:
+
++
+[listing]
+----
+C:\PS> New-SMBackup -Resources @{"Host"="10.232.204.42";"Uid"="MDC\SID";"PluginName"="hana"} -Policy hana_Filebased
+----
+. Monitorare lo stato del processo (in esecuzione, completato o non riuscito) utilizzando il cmdlet Get-smJobSummaryReport.
++
+[listing]
+----
+PS C:\> Get-smJobSummaryReport -JobID 123
+----
+. Monitorare i dettagli del processo di backup, come ID di backup, nome del backup per eseguire operazioni di ripristino o clonazione, utilizzando il cmdlet Get-SmBackupReport.
++
+[listing]
+----
+PS C:\> Get-SmBackupReport -JobId 351
+Output:
+BackedUpObjects           : {DB1}
+FailedObjects             : {}
+IsScheduled               : False
+HasMetadata               : False
+SmBackupId                : 269
+SmJobId                   : 2361
+StartDateTime             : 10/4/2016 11:20:45 PM
+EndDateTime               : 10/4/2016 11:21:32 PM
+Duration                  : 00:00:46.2536470
+CreatedDateTime           : 10/4/2016 11:21:09 PM
+Status                    : Completed
+ProtectionGroupName       : Verify_ASUP_Message_windows
+SmProtectionGroupId       : 211
+PolicyName                : test2
+SmPolicyId                : 20
+BackupName                : Verify_ASUP_Message_windows_scc54_10-04-2016_23.20.46.2758
+VerificationStatus        : NotVerified
+VerificationStatuses      :
+SmJobError                :
+BackupType                : SCC_BACKUP
+CatalogingStatus          : NotApplicable
+CatalogingStatuses        :
+ReportDataCreatedDateTime :
+----
+
+
+Le informazioni relative ai parametri che possono essere utilizzati con il cmdlet e le relative descrizioni possono essere ottenute eseguendo _Get-Help command_name_. In alternativa, fare riferimento anche a https://docs.netapp.com/us-en/snapcenter-cmdlets/index.html["Guida di riferimento al cmdlet del software SnapCenter"^].
+
+--
+====

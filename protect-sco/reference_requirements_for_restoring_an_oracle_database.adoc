@@ -1,0 +1,35 @@
+---
+permalink: protect-sco/reference_requirements_for_restoring_an_oracle_database.html 
+sidebar: sidebar 
+keywords:  
+summary: Prima di ripristinare un database Oracle, assicurarsi che i prerequisiti siano stati completati. 
+---
+= Requisiti per il ripristino di un database Oracle
+:allow-uri-read: 
+:icons: font
+:imagesdir: ../media/
+
+
+[role="lead"]
+Prima di ripristinare un database Oracle, assicurarsi che i prerequisiti siano stati completati.
+
+* La strategia di ripristino e ripristino dovrebbe essere stata definita.
+* L'amministratore di SnapCenter deve aver assegnato le Storage Virtual Machine (SVM) sia per i volumi di origine che per i volumi di destinazione, se si replicano Snapshot in un mirror o un vault.
+* Se i log di archiviazione vengono annullati come parte del backup, è necessario montare manualmente i backup del log di archiviazione richiesti.
+* Se si desidera ripristinare i database Oracle che risiedono su un Virtual Machine Disk (VMDK), assicurarsi che la macchina guest disponga del numero richiesto di slot liberi per allocare i VMDK clonati.
+* È necessario garantire che tutti i volumi di dati e i volumi di log di archiviazione appartenenti al database siano protetti se è attivata la protezione secondaria per tale database.
+* Assicurarsi che il database RAC One Node sia in stato "nomount" per eseguire il ripristino completo del file di controllo o del database.
+* Se si dispone di un'istanza di database ASM in ambiente NFS, aggiungere il percorso del disco ASM _/var/opt/snapcenter/scu/cloni/*/*_ al percorso esistente definito nel parametro asm_diskstring per montare correttamente i backup del registro ASM come parte dell'operazione di recovery.
+* Nel parametro asm_diskstring, configurare _AFD:*_ se si utilizza ASMFD o configurare _ORCL:*_ se si utilizza ASMLIB.
++
+
+NOTE: Per informazioni su come modificare il parametro asm_diskstring, vedere https://kb.netapp.com/Advice_and_Troubleshooting/Data_Protection_and_Security/SnapCenter/Disk_paths_are_not_added_to_the_asm_diskstring_database_parameter["Come aggiungere i percorsi dei dischi ad asm_diskstring"^]
+
+* È necessario configurare il listener statico nel file *listener.ora* disponibile all'indirizzo _ Oracle_HOME/network/admin_ per i database non ASM e _ Grid_HOME/network/admin_ per i database ASM se l'autenticazione del sistema operativo è stata disattivata e l'autenticazione del database Oracle è stata abilitata per un database Oracle e si desidera ripristinare i file di dati e di controllo di tale database.
+* Se le dimensioni del database sono in terabyte (TB), aumentare il valore del parametro SCORestoreTimeout eseguendo il comando Set- SmConfigSettings.
+* Assicurarsi che tutte le licenze richieste per vCenter siano installate e aggiornate.
++
+Se le licenze non sono installate o aggiornate, viene visualizzato un messaggio di avviso. Se si ignora l'avviso e si procede, il ripristino da RDM non riesce.
+
+* Assicurarsi che il LUN non sia mappato all'host AIX utilizzando iGroup costituito da protocolli misti iSCSI e FC. Per ulteriori informazioni, vedere https://kb.netapp.com/mgmt/SnapCenter/SnapCenter_Plug-in_for_Oracle_operations_fail_with_error_Unable_to_discover_the_device_for_LUN_LUN_PATH["Operazione non riuscita con errore Impossibile rilevare il dispositivo per il LUN"^].
+
