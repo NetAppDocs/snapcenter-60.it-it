@@ -63,10 +63,6 @@ SnapCenter fornisce le seguenti autorizzazioni:
 * Dashboard
 * Report
 * Ripristinare
-+
-** Full Volume Restore (solo per plug-in personalizzati)
-
-
 * Risorsa
 +
 L'amministratore deve disporre dei privilegi del plug-in per consentire ai non amministratori di eseguire l'operazione di rilevamento delle risorse.

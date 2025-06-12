@@ -153,9 +153,9 @@ Plug-in supportati da NetApp per SnapCenter
  a| 
 9090 (HTTPS), fisso
 
-Si tratta di una porta interna che viene utilizzata solo sull'host plug-in personalizzato; non è richiesta alcuna eccezione firewall.
+Si tratta di una porta interna utilizzata solo sull'host plug-in supportato da NetApp; non è richiesta alcuna eccezione firewall.
 
-La comunicazione tra il server SnapCenter e i plug-in personalizzati viene instradata attraverso la porta 8145.
+La comunicazione tra SnapCenter Server e i plug-in supportati da NetApp viene instradata tramite la porta 8145.
 
 
 

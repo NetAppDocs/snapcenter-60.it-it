@@ -77,11 +77,9 @@ I dettagli dei backup e dei cloni vengono visualizzati in formato tabella.
 
 NOTE: Non è possibile rinominare o eliminare i backup presenti nel sistema di storage secondario.
 
-+
-Se si utilizzano plug-in personalizzati di SnapCenter, non è possibile rinominare i backup presenti nel sistema di storage primario.
-
 . Se si desidera eliminare un clone, selezionarlo dalla tabella e fare clic image:../media/delete_icon.gif["icona elimina"] per eliminarlo.
 
 
-.Esempio di visualizzazione di backup e cloni sullo storage primario
+*Esempio di backup e cloni sullo storage primario*
+
 image:../media/topology_backups_and_clones_primary_storage.gif["Vista della topologia di backup e cloni nello storage primario."]
