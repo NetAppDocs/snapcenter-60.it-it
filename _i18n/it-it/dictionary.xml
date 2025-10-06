@@ -2118,7 +2118,6 @@
   <block id="3f897d901d24f02777ff0994b7823d1a" category="list-text">Dati presenti nei sistemi primari e secondari ONTAP FAS, AFF o ASA e protetti nello storage a oggetti StorageGRID locale</block>
   <block id="bc549d53e5e7a7aeb8a41511751a99f2" category="list-text">On-premise in un cloud ibrido per proteggere:</block>
   <block id="f5c37d824040662f50cbb8a32d77182d" category="list-text">Dati presenti nei sistemi primari ONTAP FAS, AFF o ASA e replicati in Cloud Volumes ONTAP</block>
-  <block id="f7b38c62b0e74d318a255bc3094cf531" category="list-text">Dati su sistemi primari e secondari ONTAP FAS, AFF o ASA e protetti per lo storage di oggetti e archivi nel cloud (utilizzando l'integrazione di backup e ripristino BlueXP)</block>
   <block id="ca5570a253e3c0a27562c65c06bb6125" category="list-text">In un cloud pubblico per proteggere:</block>
   <block id="b340c2b4a7a978a510c8ebb351622143" category="list-text">Dati presenti nei sistemi primari Cloud Volumes ONTAP (in precedenza cloud ONTAP)</block>
   <block id="b380e442ff5c6e48e283af8b6f99806f" category="list-text">Dati presenti su Amazon FSX per ONTAP</block>
@@ -9552,4 +9551,5 @@
   <block id="2894135a685829401e009e2fb1bc8cfe" category="paragraph">Se SnapCenter visualizza lo stato dell'host del server come arrestato, attendere qualche istante ed eseguire una nuova individuazione.  È anche possibile modificare il valore del parametro *HostRefreshInterval* (il valore predefinito è 3600 secondi) impostandolo su un valore superiore a 10 minuti.</block>
   <block id="cc8f8aee65ee74fabf32da5ac0a4b95c" category="list-text">Se l'aggiornamento non riesce, pulire l'installazione non riuscita, reinstallare la versione precedente SnapCenter e ripristinare il database NSM allo stato precedente.</block>
   <block id="88d9e24753477cfb09f25b21c0a59b9e" category="paragraph">SnapCenter esegue gli aggiornamenti a SnapMirror e SnapVault dopo aver completato l'operazione Snapshot.  Gli aggiornamenti SnapMirror e SnapVault vengono eseguiti come parte del processo SnapCenter .  Se si utilizza SnapMirror ActiveSync, utilizzare le pianificazioni predefinite SnapMirror o SnapVault sia per SnapMirror ActiveSync che per le relazioni asincrone.</block>
+  <block id="ea1c96f839915f73d25b910bbc92b734" category="list-text">Dati presenti sui sistemi primari e secondari ONTAP FAS, AFF o ASA e protetti su storage di oggetti e archivi nel cloud tramite l'integrazione di backup e ripristino NetApp</block>
 </blocks>
