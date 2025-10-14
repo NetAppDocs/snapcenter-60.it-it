@@ -37,7 +37,7 @@ La tabella seguente elenca le diverse porte e i relativi valori predefiniti.
 
 
  a| 
-Porta SnapCenter
+Porta web SnapCenter
  a| 
 8146 (HTTPS), bidirezionale, personalizzabile, come nell'URL _\https://server:8146_
 

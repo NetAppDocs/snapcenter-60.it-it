@@ -3392,7 +3392,6 @@
   <block id="29e256a27c9d420cee02c5cda005de01" category="paragraph">La tabella seguente elenca le diverse porte e i relativi valori predefiniti.</block>
   <block id="3672cca688eb0474cd3fee2add1a2067" category="cell">Tipo di porta</block>
   <block id="4d4690457f78e9e5cbfbcd0e36fbeff0" category="cell">Porta predefinita</block>
-  <block id="ed00b70cc595a411eff2cc42510a291f" category="paragraph">Porta SnapCenter</block>
   <block id="b213e31ffc319fa7b61f00a8dfad6e75" category="paragraph">8146 (HTTPS), bidirezionale, personalizzabile, come nell'URL _\https://server:8146_</block>
   <block id="57f72d0cb40826596637a0e2fc16a647" category="paragraph">Utilizzato per la comunicazione tra il client SnapCenter (l'utente SnapCenter) e il server SnapCenter. Utilizzato anche per la comunicazione dagli host plug-in al server SnapCenter.</block>
   <block id="c90d9871b4b86a10a62cd2bf2c1ea688" category="inline-link">Installare il server SnapCenter utilizzando l'installazione guidata.</block>
@@ -9552,4 +9551,5 @@
   <block id="cc8f8aee65ee74fabf32da5ac0a4b95c" category="list-text">Se l'aggiornamento non riesce, pulire l'installazione non riuscita, reinstallare la versione precedente SnapCenter e ripristinare il database NSM allo stato precedente.</block>
   <block id="88d9e24753477cfb09f25b21c0a59b9e" category="paragraph">SnapCenter esegue gli aggiornamenti a SnapMirror e SnapVault dopo aver completato l'operazione Snapshot.  Gli aggiornamenti SnapMirror e SnapVault vengono eseguiti come parte del processo SnapCenter .  Se si utilizza SnapMirror ActiveSync, utilizzare le pianificazioni predefinite SnapMirror o SnapVault sia per SnapMirror ActiveSync che per le relazioni asincrone.</block>
   <block id="ea1c96f839915f73d25b910bbc92b734" category="list-text">Dati presenti sui sistemi primari e secondari ONTAP FAS, AFF o ASA e protetti su storage di oggetti e archivi nel cloud tramite l'integrazione di backup e ripristino NetApp</block>
+  <block id="e6f36a956625505e0a3733e3e0073fa0" category="paragraph">Porta web SnapCenter</block>
 </blocks>
